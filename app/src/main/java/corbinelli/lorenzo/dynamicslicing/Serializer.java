@@ -27,13 +27,8 @@ public class Serializer {
      * @param args The StringBuilder in which are saved the method's arguments names to log
      */
     public void extractArgumentValues(Object arg, StringBuilder args) {
-        JsonElement jsonElement = gson.toJsonTree(arg);
-        if (jsonElement.isJsonObject() || jsonElement.isJsonArray()) {
-            String varName = getVarNameAndLogSerialization(arg.getClass(), jsonElement, arg);
-            args.append(varName).append(", ");
-        } else {    // it's a raw element
-            args.append(jsonElement).append(", ");
-        }
+        String varName = getVarNameAndLogSerialization(arg);
+        args.append(varName).append(", ");
     }
 
     /**
@@ -42,8 +37,7 @@ public class Serializer {
      * @return The variable name corresponding to the object created
      */
     public String logObjectSerialization(Object obj) {
-        JsonElement jsonElement = gson.toJsonTree(obj);
-        return getVarNameAndLogSerialization(obj.getClass(), jsonElement, obj);
+        return getVarNameAndLogSerialization(obj);
     }
 
     /**
@@ -55,13 +49,16 @@ public class Serializer {
         return gson.toJson(obj);
     }
 
-    private String getVarNameAndLogSerialization(Class<?> type, JsonElement jsonElement, Object obj) {
+    private String getVarNameAndLogSerialization(Object obj) {
         if (!flag) {
             Log.i(logTag, "Gson gson = new Gson();");
             flag = true;
         }
+        Class<?> type = obj.getClass();
+        JsonElement jsonElement = gson.toJsonTree(obj);
         boolean newObject = variableName.isANewObject(obj);
         String varName = variableName.getVariableName(obj);
+        // if the object has not an associated variable (it has not already been created), I log the creation of the object
         if(newObject) {
             Log.i(logTag, type.getCanonicalName()
                     + " "
