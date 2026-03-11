@@ -29,7 +29,7 @@ public class Serializer {
     public void extractArgumentValues(Object arg, StringBuilder args) {
         JsonElement jsonElement = gson.toJsonTree(arg);
         if (jsonElement.isJsonObject() || jsonElement.isJsonArray()) {
-            String varName = getVarNameAndLogSerialization(arg.getClass(), jsonElement);
+            String varName = getVarNameAndLogSerialization(arg.getClass(), jsonElement, arg);
             args.append(varName).append(", ");
         } else {    // it's a raw element
             args.append(jsonElement).append(", ");
@@ -43,7 +43,7 @@ public class Serializer {
      */
     public String logObjectSerialization(Object obj) {
         JsonElement jsonElement = gson.toJsonTree(obj);
-        return getVarNameAndLogSerialization(obj.getClass(), jsonElement);
+        return getVarNameAndLogSerialization(obj.getClass(), jsonElement, obj);
     }
 
     /**
@@ -55,18 +55,21 @@ public class Serializer {
         return gson.toJson(obj);
     }
 
-    private String getVarNameAndLogSerialization(Class<?> type, JsonElement jsonElement) {
+    private String getVarNameAndLogSerialization(Class<?> type, JsonElement jsonElement, Object obj) {
         if (!flag) {
             Log.i(logTag, "Gson gson = new Gson();");
             flag = true;
         }
-        String varName = variableName.getVariableName();
-        Log.i(logTag, type.getCanonicalName()
-                + " "
-                + varName
-                + "  = gson.fromJson(\""
-                + escapeJson(jsonElement.toString())
-                + "\", " + type.getCanonicalName() + ".class);");
+        boolean newObject = variableName.isANewObject(obj);
+        String varName = variableName.getVariableName(obj);
+        if(newObject) {
+            Log.i(logTag, type.getCanonicalName()
+                    + " "
+                    + varName
+                    + "  = gson.fromJson(\""
+                    + escapeJson(jsonElement.toString())
+                    + "\", " + type.getCanonicalName() + ".class);");
+        }
         return varName;
     }
 }
