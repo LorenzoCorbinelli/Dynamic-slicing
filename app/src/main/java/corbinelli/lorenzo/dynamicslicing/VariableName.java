@@ -41,15 +41,4 @@ public final class VariableName {
     public String getVariableName(Object obj) {
         return variableName + ihm.computeIfAbsent(obj, o -> counter.incrementAndGet());
     }
-
-    /**
-     * This method is used to return every time a new variable name.
-     * It can be used for example when a constructor is hooked.
-     * In this case, since a constructor instantiates everytime a different object,
-     * it will always correspond to a new variable.
-     * @return A new variable name
-     */
-    public String getSimpleVariableName() {
-        return variableName + counter.incrementAndGet();
-    }
 }

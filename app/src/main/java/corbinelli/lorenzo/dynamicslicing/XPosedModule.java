@@ -31,7 +31,8 @@ public class XPosedModule implements IXposedHookLoadPackage {
                 String beforeMemberName = "";
                 if (hockedMember instanceof Constructor) {
                     beforeMemberName = hockedMember.getDeclaringClass().getCanonicalName()
-                            + " " + variableName.getSimpleVariableName() + " = new ";
+                            + " " + variableName.getVariableName(param.thisObject) + " = new ";
+
                 } else {    // it's a method
                     Method method = (Method)hockedMember;
                     if (Modifier.isStatic(method.getModifiers())) {
