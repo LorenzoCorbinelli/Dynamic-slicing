@@ -25,8 +25,10 @@ public class XPosedModule implements IXposedHookLoadPackage {
 
     private void addCallback(Object[] parametersAndHook) {
         parametersAndHook[parametersAndHook.length - 1] = new XC_MethodHook() {
+            String returnVariableName;
             @Override
             protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                returnVariableName = variableName.getVariableName();
                 Member hockedMember = param.method;
                 String beforeMemberName = "";
                 if (hockedMember instanceof Constructor) {
@@ -34,12 +36,13 @@ public class XPosedModule implements IXposedHookLoadPackage {
                             + " " + variableName.getVariableName() + " = new ";
                 } else {    // it's a method
                     Method method = (Method)hockedMember;
+                    beforeMemberName = method.getReturnType().getCanonicalName() + " " + returnVariableName + " = ";
                     if (Modifier.isStatic(method.getModifiers())) {
                         // take the class name
-                        beforeMemberName = method.getDeclaringClass().getCanonicalName();
+                        beforeMemberName += method.getDeclaringClass().getCanonicalName();
                     } else {
                         // serialize the "this" reference
-                        beforeMemberName = serializer.logObjectSerialization(param.thisObject);
+                        beforeMemberName += serializer.logObjectSerialization(param.thisObject);
                     }
                     beforeMemberName += ".";
                 }
@@ -62,7 +65,10 @@ public class XPosedModule implements IXposedHookLoadPackage {
             protected void afterHookedMethod(MethodHookParam param) throws Throwable {
                 // only if the hooked member is a method
                 if (param.method instanceof Method) {
-                    Log.i(LOG_TAG, "// Result: " + serializer.serializeObject(param.getResult()));
+                    Method method = (Method)param.method;
+                    Log.i(LOG_TAG, "assert Objects.equals(" + returnVariableName + ", gson.fromJson(\""
+                            + serializer.serializeObjectAndEscapeJson(param.getResult())
+                            + "\", " + method.getReturnType().getCanonicalName() + ".class));");
                 }
             }
         };
