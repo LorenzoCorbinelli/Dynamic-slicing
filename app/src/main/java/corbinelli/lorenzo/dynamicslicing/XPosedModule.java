@@ -36,7 +36,14 @@ public class XPosedModule implements IXposedHookLoadPackage {
                 } else {    // it's a method
                     String returnVariableName = variableName.getVariableName(param.getResult());
                     Method method = (Method)hockedMember;
-                    beforeMemberName = method.getReturnType().getCanonicalName() + " " + returnVariableName + " = ";
+                    boolean isVoid = method.getReturnType().equals(void.class);
+                    if(!isVoid) {
+                        beforeMemberName = method.getReturnType().getCanonicalName() + " " + returnVariableName + " = ";
+                        // if it is not void manage also the returned value
+                        assertStatement = "assert Objects.equals(" + returnVariableName + ", gson.fromJson(\""
+                                + serializer.serializeObjectAndEscapeJson(param.getResult())
+                                + "\", " + method.getReturnType().getCanonicalName() + ".class));";
+                    }
                     if (Modifier.isStatic(method.getModifiers())) {
                         // take the class name
                         beforeMemberName += method.getDeclaringClass().getCanonicalName();
@@ -45,10 +52,6 @@ public class XPosedModule implements IXposedHookLoadPackage {
                         beforeMemberName += serializer.logObjectSerialization(param.thisObject);
                     }
                     beforeMemberName += ".";
-                    // manage the returned value
-                    assertStatement = "assert Objects.equals(" + returnVariableName + ", gson.fromJson(\""
-                            + serializer.serializeObjectAndEscapeJson(param.getResult())
-                            + "\", " + method.getReturnType().getCanonicalName() + ".class));";
                 }
 
                 String memberName = hockedMember.getName();
@@ -64,7 +67,8 @@ public class XPosedModule implements IXposedHookLoadPackage {
 
                 String statement = beforeMemberName + memberName + "(" + args + ");";
                 Log.i(LOG_TAG, statement);
-                Log.i(LOG_TAG, assertStatement);
+                if(!assertStatement.isEmpty())
+                    Log.i(LOG_TAG, assertStatement);
             }
         };
     }

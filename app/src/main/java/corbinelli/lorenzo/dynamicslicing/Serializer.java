@@ -27,9 +27,15 @@ public class Serializer {
      * @param args The StringBuilder in which are saved the method's arguments names to log
      */
     public void extractArgumentValues(Object arg, StringBuilder args) {
-        JsonElement jsonElement = gson.toJsonTree(arg);
-        String varName = getVarNameAndLogSerialization(arg, jsonElement);
-        args.append(varName).append(", ");
+        try {
+            JsonElement jsonElement = gson.toJsonTree(arg);
+            String varName = getVarNameAndLogSerialization(arg, jsonElement);
+            args.append(varName).append(", ");
+        } catch (Exception e) {
+            if(variableName.isTheObjectAlreadyCreated(arg)) {
+                args.append(variableName.getVariableName(arg)).append(", ");
+            }
+        }
     }
 
     /**
@@ -38,8 +44,15 @@ public class Serializer {
      * @return The variable name corresponding to the object created
      */
     public String logObjectSerialization(Object obj) {
-        JsonElement jsonElement = gson.toJsonTree(obj);
-        return getVarNameAndLogSerialization(obj, jsonElement);
+        try {
+            JsonElement jsonElement = gson.toJsonTree(obj);
+            return getVarNameAndLogSerialization(obj, jsonElement);
+        } catch(Exception e) {
+            if(variableName.isTheObjectAlreadyCreated(obj)) {
+                return variableName.getVariableName(obj);
+            }
+        }
+        return null;
     }
 
     /**
