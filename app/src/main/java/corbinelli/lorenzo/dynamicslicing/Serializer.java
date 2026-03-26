@@ -28,7 +28,7 @@ public class Serializer {
      */
     public void extractArgumentValues(Object arg, StringBuilder args) {
         JsonElement jsonElement = gson.toJsonTree(arg);
-        String varName = getVarNameAndLogSerialization(arg.getClass(), jsonElement);
+        String varName = getVarNameAndLogSerialization(arg, jsonElement);
         args.append(varName).append(", ");
     }
 
@@ -39,7 +39,7 @@ public class Serializer {
      */
     public String logObjectSerialization(Object obj) {
         JsonElement jsonElement = gson.toJsonTree(obj);
-        return getVarNameAndLogSerialization(obj.getClass(), jsonElement);
+        return getVarNameAndLogSerialization(obj, jsonElement);
     }
 
     /**
@@ -51,12 +51,13 @@ public class Serializer {
         return escapeJson(gson.toJson(obj));
     }
 
-    private String getVarNameAndLogSerialization(Class<?> type, JsonElement jsonElement) {
+    private String getVarNameAndLogSerialization(Object obj, JsonElement jsonElement) {
         if (!flag) {
             Log.i(logTag, "Gson gson = new Gson();");
             flag = true;
         }
-        String varName = variableName.getVariableName();
+        String varName = variableName.getVariableName(obj);
+        Class<?> type = obj.getClass();
         Log.i(logTag, type.getCanonicalName()
                 + " "
                 + varName

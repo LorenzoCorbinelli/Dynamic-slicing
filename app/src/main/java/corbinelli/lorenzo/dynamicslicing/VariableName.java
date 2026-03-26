@@ -15,7 +15,7 @@ public final class VariableName {
         return INSTANCE;
     }
 
-    public String getVariableName() {
-        return variableName + variableNumber++;
+    public String getVariableName(Object obj) {
+        return variableName + System.identityHashCode(obj);
     }
 }

@@ -26,14 +26,15 @@ public class XPosedModule implements IXposedHookLoadPackage {
     private void addCallback(Object[] parametersAndHook) {
         parametersAndHook[parametersAndHook.length - 1] = new XC_MethodHook() {
             String returnVariableName;
+
             @Override
-            protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
-                returnVariableName = variableName.getVariableName();
+            protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                returnVariableName = variableName.getVariableName(param.getResult());
                 Member hockedMember = param.method;
                 String beforeMemberName = "";
                 if (hockedMember instanceof Constructor) {
                     beforeMemberName = hockedMember.getDeclaringClass().getCanonicalName()
-                            + " " + variableName.getVariableName() + " = new ";
+                            + " " + variableName.getVariableName(param.thisObject) + " = new ";
                 } else {    // it's a method
                     Method method = (Method)hockedMember;
                     beforeMemberName = method.getReturnType().getCanonicalName() + " " + returnVariableName + " = ";
@@ -59,11 +60,7 @@ public class XPosedModule implements IXposedHookLoadPackage {
                 }
 
                 Log.i(LOG_TAG, beforeMemberName + memberName + "(" + args + ");");
-            }
-
-            @Override
-            protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-                // only if the hooked member is a method
+                // manage the returned value only if the hooked member is a method
                 if (param.method instanceof Method) {
                     Method method = (Method)param.method;
                     Log.i(LOG_TAG, "assert Objects.equals(" + returnVariableName + ", gson.fromJson(\""
