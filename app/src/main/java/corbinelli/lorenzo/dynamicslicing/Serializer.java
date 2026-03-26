@@ -28,12 +28,8 @@ public class Serializer {
      */
     public void extractArgumentValues(Object arg, StringBuilder args) {
         JsonElement jsonElement = gson.toJsonTree(arg);
-        if (jsonElement.isJsonObject() || jsonElement.isJsonArray()) {
-            String varName = getVarNameAndLogSerialization(arg.getClass(), jsonElement);
-            args.append(varName).append(", ");
-        } else {    // it's a raw element
-            args.append(jsonElement).append(", ");
-        }
+        String varName = getVarNameAndLogSerialization(arg.getClass(), jsonElement);
+        args.append(varName).append(", ");
     }
 
     /**
