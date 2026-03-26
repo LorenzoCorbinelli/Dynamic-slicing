@@ -25,17 +25,16 @@ public class XPosedModule implements IXposedHookLoadPackage {
 
     private void addCallback(Object[] parametersAndHook) {
         parametersAndHook[parametersAndHook.length - 1] = new XC_MethodHook() {
-            String returnVariableName;
-
             @Override
             protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-                returnVariableName = variableName.getVariableName(param.getResult());
                 Member hockedMember = param.method;
                 String beforeMemberName = "";
+                String assertStatement = "";
                 if (hockedMember instanceof Constructor) {
                     beforeMemberName = hockedMember.getDeclaringClass().getCanonicalName()
                             + " " + variableName.getVariableName(param.thisObject) + " = new ";
                 } else {    // it's a method
+                    String returnVariableName = variableName.getVariableName(param.getResult());
                     Method method = (Method)hockedMember;
                     beforeMemberName = method.getReturnType().getCanonicalName() + " " + returnVariableName + " = ";
                     if (Modifier.isStatic(method.getModifiers())) {
@@ -46,6 +45,10 @@ public class XPosedModule implements IXposedHookLoadPackage {
                         beforeMemberName += serializer.logObjectSerialization(param.thisObject);
                     }
                     beforeMemberName += ".";
+                    // manage the returned value
+                    assertStatement = "assert Objects.equals(" + returnVariableName + ", gson.fromJson(\""
+                            + serializer.serializeObjectAndEscapeJson(param.getResult())
+                            + "\", " + method.getReturnType().getCanonicalName() + ".class));";
                 }
 
                 String memberName = hockedMember.getName();
@@ -59,14 +62,9 @@ public class XPosedModule implements IXposedHookLoadPackage {
                     args.setLength(args.length() - 2);
                 }
 
-                Log.i(LOG_TAG, beforeMemberName + memberName + "(" + args + ");");
-                // manage the returned value only if the hooked member is a method
-                if (param.method instanceof Method) {
-                    Method method = (Method)param.method;
-                    Log.i(LOG_TAG, "assert Objects.equals(" + returnVariableName + ", gson.fromJson(\""
-                            + serializer.serializeObjectAndEscapeJson(param.getResult())
-                            + "\", " + method.getReturnType().getCanonicalName() + ".class));");
-                }
+                String statement = beforeMemberName + memberName + "(" + args + ");";
+                Log.i(LOG_TAG, statement);
+                Log.i(LOG_TAG, assertStatement);
             }
         };
     }
