@@ -61,7 +61,11 @@ public class Serializer {
      * @return The string representation of the object
      */
     public String serializeObjectAndEscapeJson(Object obj) {
-        return escapeJson(gson.toJson(obj));
+        try {
+            return escapeJson(gson.toJson(obj));
+        } catch (Exception e) {
+            return "OBJECT NOT SERIALIZABLE";
+        }
     }
 
     private String getVarNameAndLogSerialization(Object obj, JsonElement jsonElement) {
