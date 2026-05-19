@@ -34,7 +34,7 @@ public class XPosedModule implements IXposedHookLoadPackage {
                     beforeMemberName = hockedMember.getDeclaringClass().getCanonicalName()
                             + " " + variableName.getVariableName(param.thisObject) + " = new ";
                 } else {    // it's a method
-                    String returnVariableName = variableName.getVariableName(param.getResult());
+                    String returnVariableName = variableName.getReturnVariableName(param.getResult());
                     Method method = (Method)hockedMember;
                     boolean isVoid = method.getReturnType().equals(void.class);
                     if(!isVoid) {

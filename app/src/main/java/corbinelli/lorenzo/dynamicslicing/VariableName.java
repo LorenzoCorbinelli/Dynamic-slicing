@@ -1,13 +1,15 @@
 package corbinelli.lorenzo.dynamicslicing;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 public final class VariableName {
 
     private final String variableName = "x";
+    private final String returnVariableName = "y";
+    private int counter = 1;
     private static VariableName INSTANCE;
-    private List<Integer> hashCodeList = new ArrayList<>();
+    private Map<Integer, String> variables = new HashMap<>();
 
     private VariableName() {}
 
@@ -20,13 +22,26 @@ public final class VariableName {
 
     public String getVariableName(Object obj) {
         int hash = System.identityHashCode(obj);
-        if(!hashCodeList.contains(hash))
-            hashCodeList.add(hash);
-        return variableName + hash;
+        if(variables.containsKey(hash)) {
+            return variables.get(hash);
+        }
+        String varName = variableName + hash;
+        variables.put(hash, varName);
+        return varName;
+    }
+
+    public String getReturnVariableName(Object obj) {
+        int hash = System.identityHashCode(obj);
+        // a new name for each variable representing a return value
+        String varName = returnVariableName + counter++;
+        if(!variables.containsKey(hash)) {
+            variables.put(hash, varName);
+        }
+        return varName;
     }
 
     public boolean isTheObjectAlreadyCreated(Object obj) {
-        return hashCodeList.contains(System.identityHashCode(obj));
+        return variables.containsKey(System.identityHashCode(obj));
     }
 
 }
