@@ -34,6 +34,8 @@ public class Serializer {
         } catch (Exception e) {
             if(variableName.isTheObjectAlreadyCreated(arg)) {
                 args.append(variableName.getVariableName(arg)).append(", ");
+            } else {
+                args.append(arg.getClass().getSimpleName()).append("_notSerializable").append(", ");
             }
         }
     }
@@ -50,9 +52,10 @@ public class Serializer {
         } catch(Exception e) {
             if(variableName.isTheObjectAlreadyCreated(obj)) {
                 return variableName.getVariableName(obj);
+            } else {
+                return obj.getClass().getSimpleName() + "_notSerializable";
             }
         }
-        return null;
     }
 
     /**
@@ -72,6 +75,10 @@ public class Serializer {
         if (!flag) {
             Log.i(logTag, "Gson gson = new Gson();");
             flag = true;
+        }
+        // if the object is already present I don't need to log the creation again
+        if(variableName.isTheObjectAlreadyCreated(obj)) {
+            return variableName.getVariableName(obj);
         }
         String varName = variableName.getVariableName(obj);
         Class<?> type = obj.getClass();
