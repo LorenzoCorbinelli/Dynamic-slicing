@@ -22,6 +22,8 @@ public final class VariableName {
     }
 
     public String getVariableName(Object obj) {
+        if(obj == null)
+            return "null";
         int hash = getHash(obj);
         if(variables.containsKey(hash)) {
             return variables.get(hash);
@@ -32,6 +34,8 @@ public final class VariableName {
     }
 
     public String getReturnVariableName(Object obj) {
+        if(obj == null)
+            return "null";
         int hash = getHash(obj);
         // a new name for each variable representing a return value
         String varName = returnVariableName + counterY++;
@@ -42,6 +46,8 @@ public final class VariableName {
     }
 
     public boolean isTheObjectAlreadyCreated(Object obj) {
+        if(obj == null)
+            return true;
         return variables.containsKey(getHash(obj));
     }
 
